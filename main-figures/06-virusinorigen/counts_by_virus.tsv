@@ -1,0 +1,41 @@
+virus_name	segment	total_reads
+Epstein-Barr virus	segment_1	932
+Epstein-Barr virus	segment_10	506
+Epstein-Barr virus	segment_2	1911
+Epstein-Barr virus	segment_3	593
+Epstein-Barr virus	segment_4	328
+Epstein-Barr virus	segment_5	371
+Epstein-Barr virus	segment_6	367
+Epstein-Barr virus	segment_7	341
+Epstein-Barr virus	segment_8	353
+Epstein-Barr virus	segment_9	843
+Human betaherpesvirus	segment_1	17677
+Human betaherpesvirus	segment_10	16466
+Human betaherpesvirus	segment_2	7531
+Human betaherpesvirus	segment_3	7877
+Human betaherpesvirus	segment_4	8036
+Human betaherpesvirus	segment_5	8319
+Human betaherpesvirus	segment_6	8322
+Human betaherpesvirus	segment_7	8663
+Human betaherpesvirus	segment_8	7568
+Human betaherpesvirus	segment_9	8863
+TTV-like mini virus	segment_1	381
+TTV-like mini virus	segment_10	7
+TTV-like mini virus	segment_2	101
+TTV-like mini virus	segment_3	2
+TTV-like mini virus	segment_4	1
+TTV-like mini virus	segment_5	1
+TTV-like mini virus	segment_6	2
+TTV-like mini virus	segment_7	3
+TTV-like mini virus	segment_8	1
+TTV-like mini virus	segment_9	3
+Torque teno virus	segment_1	1655
+Torque teno virus	segment_10	404
+Torque teno virus	segment_2	46
+Torque teno virus	segment_3	31
+Torque teno virus	segment_4	367
+Torque teno virus	segment_5	94
+Torque teno virus	segment_6	42
+Torque teno virus	segment_7	31
+Torque teno virus	segment_8	68
+Torque teno virus	segment_9	1846
