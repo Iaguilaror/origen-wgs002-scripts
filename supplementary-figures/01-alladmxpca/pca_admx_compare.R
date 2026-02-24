@@ -1,7 +1,7 @@
 # load pkg
 pacman::p_load( "vroom", "dplyr", "tidyr",
                 "stringr", "ggplot2",
-                "patchwork" )
+                "patchwork", "scales" )
 
 # read data
 pca_clean2.df <- vroom( file = "allpca_runs.tsv" )
@@ -270,6 +270,28 @@ final_vertical_stack <- final_vertical_stack +
 ggsave( filename = "final_vertical_stack.png",
         plot = final_vertical_stack, width = 14, height = 28 )
 
+# do boxplots
+collapsed_df <- vroom( file = "summ_admx_proportions.tsv" ) %>% 
+  mutate( pop = factor( pop, levels = c( "MX-AMR", "EUR", "EAS", "SAS", "AFR" ) ) )
+
+box.p <- ggplot( data = collapsed_df,
+                 mapping = aes( x = run,
+                                y = proportion,
+                                fill = pop ) ) +
+  geom_boxplot( outliers = FALSE, size = 0.2 ) +
+  scale_x_discrete( limits = paste0( "_", c(0,100,200,300,400,500,600,800,900,1000,1200,1318) ) ) +
+  scale_y_continuous( labels = percent, breaks = seq( 0, 0.75, by = 0.1 ) ) +
+  # scale_fill_manual( values = mycolors.v ) +
+  theme_linedraw( base_size = 15 ) +
+  facet_wrap( ~pop, nrow = 1 ) +
+  theme( legend.position = "none",
+         panel.grid.minor = element_blank( ),
+         panel.grid.major.x = element_blank( ),
+         strip.background = element_rect( color = NA, fill = "white" ),
+         strip.text = element_text( color = "black" ), 
+         axis.text.x = element_text( angle = 90, hjust = 1, vjust = 0.5 ) ) 
+
+ggsave( filename = "box_admx.svg", plot = box.p, width = 14, height = 7 )
 
 ### move plots ----
 # 1. Define the directory name
