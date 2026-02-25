@@ -1,0 +1,7 @@
+type	freq	n	database
+SNV	common	3047	not_in_dbsnp	
+SNV	low-freq	3735	not_in_dbsnp
+SNV	rare	127374	not_in_dbsnp
+SNV	common	2399	not_in_dbsnp_andnot_mcps    
+SNV	low-freq	3402	not_in_dbsnp_andnot_mcps
+SNV	rare	90808	not_in_dbsnp_andnot_mcps
