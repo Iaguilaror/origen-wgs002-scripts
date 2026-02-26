@@ -140,3 +140,17 @@ the_panel <- cowplot::plot_grid( barras1.p,
 ggsave( filename = "T2D_panel.svg",
         plot = the_panel,
         width = 13, height = 5 )
+
+# Save everything and og home
+# 1. Create the directory if it doesn't exist
+dir.create( path = "results", showWarnings = FALSE )
+
+# 2. Identify the files to move
+files_to_move <- list.files( path = ".", 
+                             pattern = "\\.(png|svg)$", 
+                             full.names = TRUE )
+
+# 3. Move the files
+# file.rename acts as a 'move' command in Ubuntu/R
+file.rename( from = files_to_move, 
+             to = file.path( "results", basename( files_to_move ) ) )
