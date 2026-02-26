@@ -42,6 +42,62 @@ dopheat.f()
 
 dev.off( )
 
+# plot the manhattan
+# load pkgs
+pacman::p_load( "vroom", "dplyr", "ggplot2", "tidyr",
+                "stringr", "scales", "patchwork", "ggpubr", "qqman", "ggrepel" )
+
+load( file = "manhattan.Rdata" )
+
+manhattan.p <- ggplot( mapping = aes( x = BP, y = logP ) ) +
+  # geom_hline( yintercept = -log10( 1e-5 ),
+  #             linetype = "dashed", color = "red", alpha = 0.2 ) +
+  geom_point( data = manhattan_data,
+              alpha = 0.7, size = 2,
+              color = "gray" ) +
+  geom_point( data = manhattan_data %>% 
+                filter( highlight ),
+              size = 2,
+              color = "black" ) +
+  scale_x_continuous( expand = c(0.2,0.2) ) +
+  scale_y_continuous( breaks = 0:15 ) +
+  facet_wrap( ~ CHR, scales = "free_x", nrow = 1, strip.position = "bottom" ) +
+  theme_classic( base_size = 14 ) +
+  labs( x = "Genomic position", y = expression(-log[10]( q ) ),
+        title = "Manhattan plot (q < 0.01 labeled)", ) +
+  theme( legend.position = "none",
+         axis.text.x = element_blank( ),
+         strip.placement = "outside",
+         strip.background = element_blank(),
+         strip.text = element_text(size = 14),
+         panel.background = element_rect( fill = "transparent", color = "transparent" ),
+         plot.background = element_rect( fill = "transparent", color = "transparent" )
+  )
+
+# vis
+man_text.p <- manhattan.p +
+  geom_text_repel(
+    data = filter( manhattan_data, highlight ),
+    mapping = aes( label = SNP ),
+    size = 3, max.overlaps = Inf,
+  )
+
+# vis
+man_text.p
+
+# save the plots
+ggsave( filename = "manhattan.svg", plot = manhattan.p,
+        width = 21, height = 7 )
+
+ggsave( filename = "manhattan.png", plot = manhattan.p,
+        width = 21, height = 7 )
+
+ggsave( filename = "manhattan_text.svg", plot = man_text.p,
+        width = 21, height = 7 )
+
+ggsave( filename = "small_manhattan.svg", plot = manhattan.p,
+        width = 14*0.7, height = 3.5 )
+
 ### move plots ----
 # 1. Define the directory name
 dir_name <- "results"
