@@ -2,7 +2,7 @@
 Scripts and Data to reproduce figures of the oriGen-1427 WGS paper
 
 ## Description  
-To promote reproducibility in comp. bio. works, we uploaded data slices and scripts to create the plots in main and supplementary figures of our manuscript:  TO-DO after publication.  
+To promote reproducibility, we uploaded data slices and scripts to create the plots in main and supplementary figures of our manuscript:  TO-DO after publication.  
 
 ## How to use  
 
