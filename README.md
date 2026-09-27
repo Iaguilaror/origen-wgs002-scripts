@@ -59,5 +59,5 @@ This code was developed as part of Israel Aguilar-Ordoñez’s postdoctoral rese
 
 If you find the code in this repository useful, please include the following citation in your work:
 
-TO-DO after publication.  
+Aguilar-Ordoñez, Israel, et al. "Whole genome sequencing of 1427 Mexican individuals from the oriGen cohort." Nature Communications (2026).
 
