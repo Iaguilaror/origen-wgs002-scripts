@@ -17,7 +17,7 @@ exomedatreg.df <- vroom( file = "TEC-Monterrey_Freeze_Four.GxS.filtered.primus_i
 vroom_write( x = exomedatreg.df, file = "ibds.tsv" )
 
 # clean env
-rm( )
+rm( list = ls( ) )
 gc( )
 
 # ----
@@ -30,11 +30,12 @@ ifile <-  "TEC-Monterrey_Freeze_Four.GxS.filtered.primus_input.genome"
 king_data <- vroom( file = ifile ) |> 
   as_tibble( ) |> 
   select( -10 ) |> 
-  rename( Kinship = `PropIBD...6` )
+  rename( Kinship = `PropIBD...6` )  %>%
+  dplyr::filter( InfType != "Dup/MZ" )
 
 # calculate number of samples in dataset
 total_samples_in_dataset <- c( pull( king_data, ID1 ), pull( king_data, ID2 ) ) %>% 
-  unique( ) 
+  unique( )
 
 # total real samples in VCF 69,912
 
@@ -206,6 +207,19 @@ close_related_by_sample <- close_fullmatrix %>%
   mutate( total_relations = sum( counts ) ) %>% 
   ungroup( ) %>% 
   arrange( -total_relations, ID1 )
+
+# calculamos distribucion de parientes por muestra ----
+relsbyparticipant.df <- close_related_by_sample %>%
+  group_by( ID1 ) |> 
+  summarise( 
+    total_participants_related_upto3rd = sum( counts ),
+    total_participants_related_upto2nd = sum( counts[ InfType != "3rd" ] )
+  ) %>%
+  mutate( participant_random_id = paste( "random", rownames( . ) ), .before = 1 ) %>%
+  select( -2 )
+
+# save
+vroom_write( x = relsbyparticipant.df, file = "relsbyparticipant.tsv"  )
 
 # sample order
 ordered_samples_related <- close_related_by_sample %>% 

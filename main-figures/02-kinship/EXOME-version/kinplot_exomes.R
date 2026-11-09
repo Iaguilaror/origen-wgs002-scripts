@@ -170,7 +170,7 @@ mybins <- 20
 # hex_3rd.p
 
 # ----
-mybins <- 40
+mybins <- 100
 
 mycolors <- c( "Dup/MZ" = "red3", 
                "PO" = "#e94440",
@@ -231,6 +231,58 @@ allhex.p <- ggplot() +
 allhex.p
 
 ggsave( plot = allhex.p, file = "allhex.png", width = 7, height = 7 )
+
+# ----
+allbin2d.p <- ggplot() +
+  # First dataset layer
+  geom_bin_2d( data = ibd_clean_data |> filter( InfType == names( mycolors[ 2 ] ) ),
+               aes( x = IBD0Seg, y = IBD1Seg ), alpha = 0.7, bins = mybins ) +
+  scale_fill_gradient( low = lighten( mycolors[ 2 ], amount = 0.7 ),
+                       high = mycolors[ 2 ],
+                       name = names( mycolors[ 2 ] ) ) +
+  # scale_fill_gradient( low = "#C6DBEF", high = "#08306B", name = "2nd Degree") +
+  # Reset the fill scale for the next layer
+  new_scale_fill() +
+  
+  # Second dataset layer
+  geom_bin_2d( data = ibd_clean_data |> filter( InfType == names( mycolors[ 3 ] ) ),
+               aes( x = IBD0Seg, y = IBD1Seg ), alpha = 0.7, bins = mybins ) +
+  
+  scale_fill_gradient( low = lighten( mycolors[ 3 ], amount = 0.7 ),
+                       high = mycolors[ 3 ],
+                       name = names( mycolors[ 3 ] ) ) +
+  
+  # Reset the fill scale for the next layer
+  new_scale_fill() +
+  
+  # 3rd dataset layer
+  geom_bin_2d( data = ibd_clean_data |> filter( InfType == names( mycolors[ 4 ] ) ),
+               aes( x = IBD0Seg, y = IBD1Seg ), alpha = 0.7, bins = mybins ) +
+  
+  scale_fill_gradient( low = lighten( mycolors[ 4 ], amount = 0.7 ),
+                       high = mycolors[ 4 ],
+                       name = names( mycolors[ 4 ] ) ) +
+  
+  # Reset the fill scale for the next layer
+  new_scale_fill() +
+  
+  # 4th dataset layer
+  geom_bin_2d( data = ibd_clean_data |> filter( InfType == names( mycolors[ 5 ] ) ),
+               aes( x = IBD0Seg, y = IBD1Seg ), alpha = 0.7, bins = mybins ) +
+  
+  scale_fill_gradient( low = lighten( mycolors[ 5 ], amount = 0.7 ),
+                       high = mycolors[ 5 ],
+                       name = names( mycolors[ 5 ] ) ) +
+  
+  coord_cartesian(xlim = c(0, 1), ylim = c(0, 1)) +
+  scale_y_continuous( limits = c( -0.05, 1.1 ), breaks = seq( 0, 1, 0.2 ) ) +
+  scale_x_continuous( limits = c( -0.05, 0.9 ), breaks = seq( 0, 1, 0.2 ) ) +
+  theme_classic( ) +
+  theme( legend.position = "none" )
+
+allbin2d.p
+
+ggsave( plot = allbin2d.p, file = "allbin2d.png", width = 7, height = 7 )
 
 ### Relationships bar plot ----
 participiants_by_number_of_rels <- vroom( file = "number_of_relationships.tsv" )
@@ -508,3 +560,67 @@ if (length(files_to_move) > 0) {
 } else {
   message("No .svg or .pdf files found to move.")
 }
+
+# Analisis de cuantos parientes tiene cada individuo ----
+relsbyp.df <- vroom( file = "relsbyparticipant.tsv" ) %>%
+  as_tibble( )
+
+str( relsbyp.df )
+
+# how many have N relatives
+upto3rd_cum.df <- relsbyp.df %>%
+  count( total_participants_related_upto3rd ) %>%
+  mutate( total = sum( n ),
+          cumul_n = cumsum( n ),
+          cumul_frac = cumul_n / total ) %>%
+  rename( n_rels = 1,
+          cumul_frac_3rd = cumul_frac )
+
+upto2nd_cum.df <- relsbyp.df %>%
+  count( total_participants_related_upto2nd ) %>%
+  filter( total_participants_related_upto2nd > 0 ) %>%
+  mutate( total = sum( n ),
+          cumul_n = cumsum( n ),
+          cumul_frac = cumul_n / total )  %>%
+  rename( n_rels = 1,
+          cumul_frac_2nd = cumul_frac )
+
+curves.df <- left_join( 
+  x = select( upto2nd_cum.df, n_rels, cumul_frac_2nd ),
+  y = select( upto3rd_cum.df, n_rels, cumul_frac_3rd ),
+  by = "n_rels" ) %>%
+  bind_rows( data.frame( n_rels = 1,
+                         cumul_frac_2nd = 0,
+                         cumul_frac_3rd = 0 ) ,
+             . )
+
+# plot
+mycolors <- c( "FS" = "#ec7538",
+               # "2nd" = "#98593b",
+               "2nd" = "limegreen",
+               "3rd" = "#5987e6",
+               "4th" = "yellow2",
+               "UN" = "gray" )
+
+relsbyparticipant.p <- ggplot( data = curves.df,
+                               mapping = aes( x = n_rels ) ) +
+  # geom_segment( x = 1, xend = 1, y = 0, yend = 0.5,
+  #               linetype = "dashed", color = "tomato" ) +
+  geom_segment( x = 0, xend = 1, y = 0.5, yend = 0.5, alpha = 0.05,
+                linetype = "dashed", color = "tomato" ) +
+  # geom_line(  mapping = aes( y = cumul_frac_2nd ),
+  #             color = "limegreen" ) +
+  # geom_point(  data = curves.df %>% slice( -1 ),
+  #              mapping = aes( y = cumul_frac_3rd ),
+  #              color = "#5987e6", size = 3 ) +
+  # geom_line(  mapping = aes( y = cumul_frac_3rd ),
+  #             color = "#5987e6", size = 1 ) +
+  geom_step(  mapping = aes( y = cumul_frac_3rd ),
+              color = "#5987e6", size = 1 ) +
+  scale_x_continuous( breaks = seq( 1, 10, 1 ), limits = c( 1, 10 ) ) +
+  scale_y_continuous( breaks = seq( 0, 1, 0.1 ), labels = percent ) +
+  labs( x = "(N) number of relatives",
+        y = "percentage of participants with N relatives" ) +
+  theme_classic( base_size = 30 )
+
+ggsave( plot = relsbyparticipant.p, filename = "relsbyparticipant.png", width = 10, height = 7 )
