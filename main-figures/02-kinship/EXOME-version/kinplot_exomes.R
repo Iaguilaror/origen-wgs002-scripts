@@ -1,7 +1,7 @@
 # load packages
 pacman::p_load( "vroom", "dplyr",
                 "ggplot2", "ggsci", "scales", "hexbin", "colorspace", "ggnewscale",
-                "patchwork", "ggtern", "ggrepel", "cowplot" )
+                "patchwork", "ggtern", "ggrepel", "cowplot", "plotly", "scatterplot3d" )
 
 # order of relations
 rel_order <- c( "Dup/MZ", "PO", "FS", "2nd", "3rd", "4th", "UN" )
@@ -111,13 +111,6 @@ ggtern( data = ibd_clean_data,
 #   theme_showarrows( )
 
 # plot bidimensional ----
-ggplot( data = ibd_clean_data,
-        mapping = aes( x = IBD0Seg,
-                       y = IBD1Seg,
-                       fill = InfType ) ) +
-  geom_point( shape = 21 ) +
-  theme_classic( )
-
 ggplot( data = ibd_clean_data,
         mapping = aes( x = IBD0Seg,
                        y = IBD1Seg,
@@ -283,6 +276,94 @@ allbin2d.p <- ggplot() +
 allbin2d.p
 
 ggsave( plot = allbin2d.p, file = "allbin2d.png", width = 7, height = 7 )
+
+## try dots alpha -----
+# mycolors <- c( "FS" = "#ec7538",
+#                # "2nd" = "#98593b",
+#                "2nd" = "limegreen",
+#                "3rd" = "#5987e6",
+#                "4th" = "yellow2",
+#                "UN" = "gray" )
+
+ibd_clean_data %>%
+  filter( InfType != "Dup/MZ" ) %>%
+  ggplot( data = .,
+          mapping = aes( x = IBD0Seg,
+                         y = IBD1Seg,
+                         fill = InfType ) ) +
+  geom_point( shape = 21, alpha = 0.3, size = 2.5, color = "white" ) +
+  scale_fill_manual( values = mycolors ) +
+  theme_classic( )
+
+ibd_clean_data %>%
+  filter( InfType != "Dup/MZ" ) %>%
+  ggplot( data = .,
+          mapping = aes( x = IBD0Seg,
+                         y = IBD1Seg,
+                         fill = InfType ) ) +
+  geom_point( shape = 21, alpha = 0.3, size = 2.5 ) +
+  scale_fill_manual( values = mycolors ) +
+  theme_classic( base_size = 20 )
+
+ggplot( data = ibd_clean_data,
+        mapping = aes( x = IBD0Seg,
+                       y = IBD1Seg,
+                       color = InfType ) ) +
+  geom_point( alpha = 0.1, size = 2.5 ) +
+  scale_color_manual( values = mycolors ) +
+  theme_classic( )
+
+## IBD in 3D ----
+# Aseguramos que la paleta manual coincida
+plot_ly(
+  data = filter( ibd_clean_data, InfType != "Dup/MZ" ),
+  x = ~IBD2Seg,   # Ajusta tu variable del eje X si aplica
+  y = ~IBD1Seg,
+  z = ~IBD0Seg,
+  color = ~InfType,
+  colors = mycolors,
+  type = "scatter3d",
+  mode = "markers",
+  marker = list(
+    size = 2.5,
+    opacity = 0.3  # Similar al alpha de ggplot
+  )
+) %>%
+  layout(
+    scene = list(
+      xaxis = list(title = "IBD2Seg"),
+      yaxis = list(title = "IBD1Seg"),
+      zaxis = list(title = "IBD0Seg")
+    )
+  )
+
+# Mapeamos los colores vectoriales según la categoría InfType
+color_vector <- mycolors[as.factor(ibd_clean_data$InfType)]
+# Añadimos transparencia (alpha) a los colores en formato HEX
+color_alpha <- adjustcolor(color_vector, alpha.f = 0.3)
+
+plot.new( )
+
+s3d <- scatterplot3d(
+  x = ibd_clean_data$IBD2Seg,
+  y = ibd_clean_data$IBD1Seg,
+  z = ibd_clean_data$IBD0Seg,
+  color = color_alpha,
+  pch = 19,
+  cex.symbols = 0.8,
+  xlab = "IBD2Seg",
+  ylab = "IBD1Seg",
+  zlab = "IBD0Seg"
+)
+
+# Agregar leyenda manual
+legend(
+  "topright",
+  legend = levels(as.factor(ibd_clean_data$InfType)),
+  col = mycolors,
+  pch = 19,
+  bty = "n"
+)
 
 ### Relationships bar plot ----
 participiants_by_number_of_rels <- vroom( file = "number_of_relationships.tsv" )
@@ -606,8 +687,10 @@ relsbyparticipant.p <- ggplot( data = curves.df,
                                mapping = aes( x = n_rels ) ) +
   # geom_segment( x = 1, xend = 1, y = 0, yend = 0.5,
   #               linetype = "dashed", color = "tomato" ) +
-  geom_segment( x = 0, xend = 1, y = 0.5, yend = 0.5, alpha = 0.05,
-                linetype = "dashed", color = "tomato" ) +
+  # geom_segment( x = 0, xend = 1, y = 0.5, yend = 0.5, alpha = 0.05,
+  #               linetype = "dashed", color = "tomato" ) +
+  geom_hline( yintercept = 0.5, alpha = 0.3,
+              linetype = "dashed", color = "tomato" ) +
   # geom_line(  mapping = aes( y = cumul_frac_2nd ),
   #             color = "limegreen" ) +
   # geom_point(  data = curves.df %>% slice( -1 ),
@@ -622,5 +705,7 @@ relsbyparticipant.p <- ggplot( data = curves.df,
   labs( x = "(N) number of relatives",
         y = "percentage of participants with N relatives" ) +
   theme_classic( base_size = 30 )
+
+relsbyparticipant.p
 
 ggsave( plot = relsbyparticipant.p, filename = "relsbyparticipant.png", width = 10, height = 7 )
